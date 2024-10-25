@@ -6,11 +6,11 @@ module.exports.createEventDBService = async (eventDetails) => {
         var eventModelData = new eventModel(eventDetails);
         console.log('eventModelData');
         
-        const saveDoc = await eventModelData.save(); // Save the document
+        const saveDoc = await eventModelData.save(); 
         console.log('Document saved:', saveDoc);
-        return saveDoc; // Return the saved document or true
+        return saveDoc; 
     } catch(err) {
         console.log('Error:', err);
-        return null; // Indicate failure by returning null
+        return null;
     }
 };

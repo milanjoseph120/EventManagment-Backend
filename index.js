@@ -4,8 +4,10 @@ const port = 4000
 const mongoose = require('mongoose')
 var routes = require('./routes/eventRoutes');
 const creationRoutes = require('./routes/creationRoutes');
+const eventRegRoutes = require('./routes/eventRegRoutes')
 const event = require("./src/eventcreation/eventModel");
-const login = require("./src/people/peoplesService")
+const login = require("./src/people/peoplesService");
+const eventReg = require("./src/eventRegisteration/eventRegService")
 const cors = require('cors')
 app.use(express.json());
 
@@ -25,7 +27,7 @@ mongoose.connect('mongodb://localhost:27018/people', { useNewUrlParser: true, us
 
     const router = express.Router()
 
-        // for login
+        // for registeration
     app.post('/people/create', async (req, res) => {
       try {
           const response = await login.createPeopleDBService(req.body);
@@ -78,22 +80,7 @@ app.delete('/api/events/:id', async (req, res) => {
 // To update Events
 
 
-// app.put('/api/events/:id', async (req, res) => {
-//   try {
-//       const { id } = req.params; 
-//       const updateData = req.body; 
 
-//       const updatedEvent = await event.findByIdAndUpdate(id, updateData, { new: true }); 
-
-//       if (!updatedEvent) {
-//           return res.status(404).json({ message: 'Event not found' }); 
-//       }
-
-//       res.status(200).json(updatedEvent); 
-//   } catch (error) {
-//       res.status(500).json({ message: error.message });
-//   }
-// });
 app.put('/api/events/:id', async (req, res) => {
   try {
       const { id } = req.params;
@@ -131,8 +118,39 @@ app.get('/api/events/:id', async (req, res) => {
 });
 
 
-    app.use(routes)
+// for registering events
+app.post('/people/eventReg', async (req, res) => {
+    try {
+        const response = await eventReg.createEventRegistrationService(req.body);
+        res.status(response.status).json({ msg: response.msg, data: response.data || null });
+    } catch (error) {
+        res.status(500).json({ msg: error.msg || "Server error" });
+    }
+});
+
+// to get eventname to the event register form
+app.get('/api/events/name/:id', async (req, res) => {
+    try {
+        const id = req.params['id'];
+        console.log('Requested Event ID:', id);
+
+        const eventDetails = await event.findOne({ _id: id }, 'eventname').lean(); 
+
+        if (!eventDetails) {
+            return res.status(404).json({ message: 'Event not found' });
+        }
+
+        res.json({ eventname: eventDetails.eventname });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+
+  
+    app.use(routes);
     app.use(creationRoutes); 
+    app.use(eventRegRoutes)
     
 
 app.get('/', (req, res) => {
